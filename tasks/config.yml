@@ -1,0 +1,120 @@
+---
+- name: Hardening SSH
+  block:
+    - name: "Apply sshd_config hardening"
+      ansible.builtin.lineinfile:
+        path: "{{ var_sshd_config_path }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      when: item.when | default(true) | bool
+      loop:
+        - name: port
+          regexp: '^(#Port|Port)'
+          line: "Port {{ in_sshd_config.port | default(var_sshd_default_config.port) }}"
+        - name: password_authentication
+          regexp: '^(#PasswordAuthentication|PasswordAuthentication)'
+          line: "PasswordAuthentication {{ in_sshd_config.password_authentication | default(var_sshd_default_config.password_authentication) }}"
+        - name: permit_root_login
+          regexp: '^(#PermitRootLogin|PermitRootLogin)'
+          line: "PermitRootLogin {{ in_sshd_config.permit_root_login | default(var_sshd_default_config.permit_root_login) }}"
+        - name: pubkey_authentication
+          regexp: '^(#PubkeyAuthentication|PubkeyAuthentication)'
+          line: "PubkeyAuthentication {{ in_sshd_config.pubkey_authentication | default(var_sshd_default_config.pubkey_authentication) }}"
+        - name: authentication_methods
+          regexp: '^(#AuthenticationMethods|AuthenticationMethods)'
+          line: "AuthenticationMethods {{ in_sshd_config.authentication_methods | default(var_sshd_default_config.authentication_methods) }}"
+        - name: permit_empty_passwords
+          regexp: '^(#PermitEmptyPasswords|PermitEmptyPasswords)'
+          line: "PermitEmptyPasswords {{ in_sshd_config.permit_empty_passwords | default(var_sshd_default_config.permit_empty_passwords) }}"
+        - name: max_auth_tries
+          regexp: '^(#MaxAuthTries|MaxAuthTries)'
+          line: "MaxAuthTries {{ in_sshd_config.max_auth_tries | default(var_sshd_default_config.max_auth_tries) }}"
+        - name: max_sessions
+          regexp: '^(#MaxSessions|MaxSessions)'
+          line: "MaxSessions {{ in_sshd_config.max_sessions | default(var_sshd_default_config.max_sessions) }}"
+        - name: login_grace_time
+          regexp: '^(#LoginGraceTime|LoginGraceTime)'
+          line: "LoginGraceTime {{ in_sshd_config.login_grace_time | default(var_sshd_default_config.login_grace_time) }}"
+        - name: client_alive_interval
+          regexp: '^(#ClientAliveInterval|ClientAliveInterval)'
+          line: "ClientAliveInterval {{ in_sshd_config.client_alive_interval | default(var_sshd_default_config.client_alive_interval) }}"
+        - name: client_alive_count_max
+          regexp: '^(#ClientAliveCountMax|ClientAliveCountMax)'
+          line: "ClientAliveCountMax {{ in_sshd_config.client_alive_count_max | default(var_sshd_default_config.client_alive_count_max) }}"
+        - name: allow_tcp_forwarding
+          regexp: '^(#AllowTcpForwarding|AllowTcpForwarding)'
+          line: "AllowTcpForwarding {{ in_sshd_config.allow_tcp_forwarding | default(var_sshd_default_config.allow_tcp_forwarding) }}"
+        - name: gateway_ports
+          regexp: '^(#GatewayPorts|GatewayPorts)'
+          line: "GatewayPorts {{ in_sshd_config.gateway_ports | default(var_sshd_default_config.gateway_ports) }}"
+        - name: x11_forwarding
+          regexp: '^(#X11Forwarding|X11Forwarding)'
+          line: "X11Forwarding {{ in_sshd_config.x11_forwarding | default(var_sshd_default_config.x11_forwarding) }}"
+        - name: permit_user_environment
+          regexp: '^(#PermitUserEnvironment|PermitUserEnvironment)'
+          line: "PermitUserEnvironment {{ in_sshd_config.permit_user_environment | default(var_sshd_default_config.permit_user_environment) }}"
+        - name: banner
+          regexp: '^(#Banner|Banner)'
+          line: "Banner {{ in_sshd_config.banner | default(var_sshd_default_config.banner) }}"
+        - name: kex_algorithms
+          regexp: '^(#KexAlgorithms|KexAlgorithms)'
+          line: "KexAlgorithms {{ in_sshd_config.kex_algorithms | default(var_sshd_default_config.kex_algorithms) | join(',') }}"
+        - name: ciphers
+          regexp: '^(#Ciphers|Ciphers)'
+          line: "Ciphers {{ in_sshd_config.ciphers | default(var_sshd_default_config.ciphers) | join(',') }}"
+        - name: macs
+          regexp: '^(#MACs|MACs)'
+          line: "MACs {{ in_sshd_config.macs | default(var_sshd_default_config.macs) | join(',') }}"
+        - name: host_key_algorithms
+          regexp: '^(#HostKeyAlgorithms|HostKeyAlgorithms)'
+          line: "HostKeyAlgorithms {{ in_sshd_config.host_key_algorithms | default(var_sshd_default_config.host_key_algorithms) | join(',') }}"
+      loop_control:
+        label: "{{ item.name }}"
+      notify: "Restart SSHD"
+
+    - name: "Restrict allowed users"
+      ansible.builtin.lineinfile:
+        path: "{{ var_sshd_config_path }}"
+        regexp: '^(#AllowUsers|AllowUsers)'
+        line: "AllowUsers {{ in_sshd_config.allow_users | join(' ') }}"
+        state: present
+      when: in_sshd_config.allow_users | default([], true) | length > 0
+      notify: "Restart SSHD"
+
+    - name: "Remove AllowUsers when not defined"
+      ansible.builtin.lineinfile:
+        path: "{{ var_sshd_config_path }}"
+        regexp: '^AllowUsers'
+        state: absent
+      when: in_sshd_config.allow_users | default([], true) | length == 0
+      notify: "Restart SSHD"
+
+    - name: "Restrict allowed groups"
+      ansible.builtin.lineinfile:
+        path: "{{ var_sshd_config_path }}"
+        regexp: '^(#AllowGroups|AllowGroups)'
+        line: "AllowGroups {{ in_sshd_config.allow_groups | join(' ') }}"
+        state: present
+      when: in_sshd_config.allow_groups | default([], true) | length > 0
+      notify: "Restart SSHD"
+
+    - name: "Remove AllowGroups when not defined"
+      ansible.builtin.lineinfile:
+        path: "{{ var_sshd_config_path }}"
+        regexp: '^AllowGroups'
+        state: absent
+      when: in_sshd_config.allow_groups | default([], true) | length == 0
+      notify: "Restart SSHD"
+
+    - name: "Enforce sshd_config permissions"
+      ansible.builtin.file:
+        path: "{{ var_sshd_config_path }}"
+        owner: root
+        group: root
+        mode: '0600'
+
+  rescue:
+    - name: "SSH server configuration failed"
+      ansible.builtin.fail:
+        msg: "❌ SSH server configuration failed. Check logs."

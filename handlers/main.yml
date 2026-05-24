@@ -1,0 +1,12 @@
+---
+- name: "Validate SSHD config"
+  ansible.builtin.command: sshd -t
+  changed_when: false
+  listen: "Restart SSHD"
+
+- name: "Restart SSHD"
+  ansible.builtin.service:
+    name: "{{ var_sshd_service }}"
+    state: restarted
+    enabled: true
+  listen: "Restart SSHD"

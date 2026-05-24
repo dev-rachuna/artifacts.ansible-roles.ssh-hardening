@@ -1,0 +1,5 @@
+molecule_test_dev.sh
+.pytest_cache
+**/__pycache__/
+.env
+.yamllint

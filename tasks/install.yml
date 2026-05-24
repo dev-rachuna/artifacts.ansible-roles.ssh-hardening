@@ -1,0 +1,25 @@
+---
+- name: "Install ssh server"
+  block:
+    - name: "Refresh apt cache (Debian/Ubuntu)"
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      when: ansible_facts.os_family  == "Debian"
+      changed_when: false
+
+    - name: "Install ssh packages"
+      ansible.builtin.package:
+        name: "{{ var_sshd_packages }}"
+        state: present
+
+    - name: "Ensure ssh service is enabled and started"
+      ansible.builtin.service:
+        name: "{{ var_sshd_service }}"
+        state: started
+        enabled: true
+
+  rescue:
+    - name: "SSH server installation failed"
+      ansible.builtin.fail:
+        msg: "❌ SSH server installation failed. Check package manager logs."

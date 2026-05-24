@@ -1,0 +1,34 @@
+---
+in_sshd_config:
+  port: 22
+  permit_root_login: "no"
+  password_authentication: "no"
+  pubkey_authentication: "yes"
+  authentication_methods: "publickey"
+  permit_empty_passwords: "no"
+  max_auth_tries: 3
+  max_sessions: 2
+  login_grace_time: "30s"
+  client_alive_interval: 300
+  client_alive_count_max: 2
+  allow_tcp_forwarding: "no"
+  gateway_ports: "no"
+  x11_forwarding: "no"
+  permit_user_environment: "no"
+  banner: "/etc/issue.net"
+  allow_users: []
+  allow_groups: []
+  kex_algorithms:
+    - curve25519-sha256@libssh.org
+    - curve25519-sha256
+  ciphers:
+    - chacha20-poly1305@openssh.com
+    - aes256-gcm@openssh.com
+    - aes128-gcm@openssh.com
+  macs:
+    - hmac-sha2-512-etm@openssh.com
+    - hmac-sha2-256-etm@openssh.com
+  host_key_algorithms:
+    - ssh-ed25519
+    - rsa-sha2-512
+    - rsa-sha2-256
