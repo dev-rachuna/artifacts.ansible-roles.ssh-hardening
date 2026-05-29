@@ -1,4 +1,6 @@
-# <img src=".gitlab/ansible.png" alt="linux" height="20"/> ssh-hardening
+# <img src=".gitlab/ansible.png" alt="linux" height="30"/> ssh-hardening
+
+::include{file=.gitlab/badges.md}
 
 Rola instaluje i twardzi serwer OpenSSH (pakiety + podstawowa konfiguracja bezpieczeństwa) na dystrybucjach Debian/Ubuntu, RHEL/AlmaLinux oraz Alpine.
 
@@ -137,21 +139,4 @@ in_sshd_config:
 
 ---
 
-## Contributions
-
-Jeśli masz pomysły na ulepszenia, zgłoś problemy, rozwidl repozytorium lub utwórz Merge Request. Wszystkie wkłady są mile widziane!
-[Contributions](CONTRIBUTING.md)
-
----
-
-## License
-
-[Licencja](LICENSE) oparta na zasadach Creative Commons BY-NC-SA 4.0, dostosowana do potrzeb projektu.
-
----
-
-## Author Information
-
-| ![Maciej Rachuna](https://gitlab.com/uploads/-/system/user/avatar/8161705/avatar.png?width=120px) |
-|---------------------------------------------------------------------------------------------------|
-| [Maciej Rachuna](https://gitlab.commrachuna)                                                      |
+::include{file=.gitlab/footer.md}
